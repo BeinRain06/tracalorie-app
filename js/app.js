@@ -20,10 +20,58 @@ class CaloriesTracker {
     this._totalRhytmCalories += meal.calories;
     this._meals.push(meal);
     this._render();
+    console.log(this._meals);
   }
   addWorkout(workout) {
     this._totalRhytmCalories -= workout.calories;
     this._workouts.push(workout);
+    this._render();
+  }
+
+  removeMeal(id) {
+    const mealToThrow = this._meals.find((element) => element.id === id);
+
+    if (mealToThrow !== undefined) {
+      this._totalRhytmCalories -= mealToThrow.calories;
+    }
+
+    const itemId = this._meals.findIndex((element) => element.id === id);
+
+    if (itemId !== -1) {
+      this._meals.splice(itemId, 1);
+    }
+
+    this._render();
+  }
+
+  removeWorkout(id) {
+    const workoutToThrow = this._workouts.find((element) => element.id === id);
+
+    if (workoutToThrow !== undefined) {
+      this._totalRhytmCalories += workoutToThrow.calories;
+    }
+
+    const itemId = this._workouts.findIndex((element) => element.id === id);
+
+    if (itemId !== -1) {
+      this._workouts.splice(itemId, 1);
+    }
+
+    this._render();
+  }
+
+  setLimit(caloriesLimit) {
+    this._caloriesLimit = caloriesLimit;
+    this._displayCaloriesLimit();
+    this._render();
+  }
+
+  reset() {
+    //reset stats
+    this._meals = [];
+    this._workouts = [];
+    this._totalRhytmCalories = 0;
+
     this._render();
   }
 
@@ -32,7 +80,6 @@ class CaloriesTracker {
     const caloriesLimit = document.getElementById("calories-limit");
 
     caloriesLimit.innerHTML = this._caloriesLimit;
-    console.log(caloriesLimit);
   }
 
   _displayTotalRhytmCalories() {
@@ -144,7 +191,19 @@ class App {
 
     document
       .getElementById("reset")
-      .addEventListener("click", this._resetDay.bind(this));
+      .addEventListener("click", this._reset.bind(this));
+
+    document
+      .getElementById("meal-items")
+      .addEventListener("click", this._removeItem.bind(this, "meal"));
+
+    document
+      .getElementById("workout-items")
+      .addEventListener("click", this._removeItem.bind(this, "workout"));
+
+    document
+      .getElementById("limit-form")
+      .addEventListener("submit", this._setLimit.bind(this));
   }
 
   _newAddItem(type, e) {
@@ -182,6 +241,7 @@ class App {
     const card = document.createElement("div");
 
     card.classList.add("card", "my-2");
+    card.setAttribute("data-id", `${item.id}`);
 
     card.innerHTML = `
     <div class="card-body">
@@ -206,11 +266,32 @@ class App {
 
     // close our form with collapse bootstrap
 
-    /*  const collapseItem = document.getElementById(`collapse-${typeEl}`);
+    const collapseItem = document.getElementById(`collapse-${typeEl}`);
 
-    const bsCollapse = new Bootstrap(collapseItem, { toggle: true });
+    const bsCollapse = new bootstrap.Collapse(collapseItem, { toggle: true });
 
-    bsCollapse; */
+    bsCollapse.hide();
+  }
+
+  _removeItem(type, e) {
+    e.preventDefault();
+    let typeEl = type === "meal" ? "meal" : "workout";
+    console.log(e.target);
+    console.log(this._tracker._meals);
+    if (
+      e.target.classList.contains("delete") ||
+      e.target.classList.contains("fa-xmark")
+    ) {
+      const id = e.target.closest(".card", ".my-2").getAttribute("data-id");
+
+      console.log(id);
+
+      typeEl = "meal"
+        ? this._tracker.removeMeal(id)
+        : this._tracker.removeWorkout(id);
+
+      e.target.closest(".card", ".my-2").remove();
+    }
   }
 
   _filterItem(type, e) {
@@ -233,15 +314,29 @@ class App {
     }
   }
 
-  _resetDay(e) {
+  _setLimit(e) {
+    e.preventDefault();
+    const limit = document.getElementById("limit");
+
+    if (limit.value === "" || typeof +limit.value !== "number") {
+      alert("please add a limit");
+      return;
+    }
+
+    this._tracker.setLimit(+limit.value);
+    limit.value = "";
+
+    //hide Modal form
+    const modalEl = document.getElementById("limit-modal");
+    const modal = bootstrap.Modal.getInstance(modalEl);
+    modal.hide();
+  }
+
+  _reset(e) {
     e.preventDefault();
 
-    //reset stats
-    this._tracker._meals = [];
-    this._tracker._workouts = [];
-    this._tracker._totalRhytmCalories = 0;
-
-    this._tracker._render();
+    // reset stats
+    this._tracker.reset();
 
     //reset progress bar
     const caloriesProgress = document.getElementById("calorie-progress");
