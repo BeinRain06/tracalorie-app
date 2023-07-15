@@ -59,14 +59,27 @@ class CaloriesTracker {
 
   _displayCaloriesRemaining() {
     const caloriesRemaining = document.getElementById("calories-remaining");
+
+    const caloriesProgress = document.getElementById("calorie-progress");
+
     const remaining = this._caloriesLimit - this._totalRhytmCalories;
     caloriesRemaining.innerHTML = remaining;
-    if (remaining > 0) {
-      caloriesRemaining.parentElement.parentElement.style.className =
-        "card bg-light";
+    if (remaining <= 0) {
+      caloriesRemaining.parentElement.parentElement.classList.remove(
+        "bg-light"
+      );
+      caloriesProgress.classList.remove("bg-success");
+
+      caloriesRemaining.parentElement.parentElement.classList.add("bg-danger");
+      caloriesProgress.classList.add("bg-danger");
     } else {
-      caloriesRemaining.parentElement.parentElement.style.className =
-        "card bg-danger";
+      caloriesRemaining.parentElement.parentElement.classList.remove(
+        "bg-danger"
+      );
+      caloriesProgress.classList.remove("bg-danger");
+
+      caloriesRemaining.parentElement.parentElement.classList.add("bg-light");
+      caloriesProgress.classList.add("bg-success");
     }
   }
 
@@ -108,32 +121,138 @@ class Workout {
   }
 }
 
-const calories_Tracker = new CaloriesTracker();
-
-const meal = new Meal("breakfast", 1500);
-const run = new Workout("running", 350);
-
-const morningEat = calories_Tracker.addMeal(meal);
-const runningRoutine = calories_Tracker.addWorkout(run);
-
-morningEat;
-runningRoutine;
-
-console.log(calories_Tracker);
-
 class App {
   constructor() {
     this._tracker = new CaloriesTracker();
-  }
 
-  eventHandler() {
     // add Events Listeners
     document
-      .getElemenById("meal-form")
-      .addEventListener("submit", this.newAddItem.bind(this, type));
+      .getElementById("meal-form")
+      .addEventListener("submit", this._newAddItem.bind(this, "meal"));
+
+    document
+      .getElementById("workout-form")
+      .addEventListener("submit", this._newAddItem.bind(this, "workout"));
+
+    document
+      .getElementById("filter-meals")
+      .addEventListener("keyup", this._filterItem.bind(this, "meals"));
+
+    document
+      .getElementById("filter-workouts")
+      .addEventListener("keyup", this._filterItem.bind(this, "workouts"));
+
+    document
+      .getElementById("reset")
+      .addEventListener("click", this._resetDay.bind(this));
   }
 
   _newAddItem(type, e) {
     e.preventDefault();
+
+    const typeEl = type === "meal" ? "meal" : "workout";
+
+    const newItems = document.getElementById(`${typeEl}-items`);
+
+    const name = document.getElementById(`${typeEl}-name`);
+
+    const calories = document.getElementById(`${typeEl}-calories`);
+
+    if (name.value === "" || calories.value === "") {
+      alert("None effective. Fill all fields");
+      return;
+    }
+
+    const item =
+      typeEl === "meal"
+        ? new Meal(name.value, +calories.value)
+        : new Workout(name.value, +calories.value);
+
+    let bgColor = "";
+
+    if (typeEl === "meal") {
+      this._tracker.addMeal(item);
+      bgColor = "bg-primary";
+    }
+    if (typeEl === "workout") {
+      this._tracker.addWorkout(item);
+      bgColor = "bg-secondary";
+    }
+
+    const card = document.createElement("div");
+
+    card.classList.add("card", "my-2");
+
+    card.innerHTML = `
+    <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                  <h4 class="mx-1">${item.name}</h4>
+                  <div
+                    class="fs-1 ${bgColor} text-white text-center rounded-2 px-2 px-sm-5"
+                  >
+                    ${item.calories}
+                  </div>
+                  <button class="delete btn btn-danger btn-sm mx-2">
+                    <i class="fa-solid fa-xmark"></i>
+                  </button>
+                </div>
+              </div>`;
+
+    newItems.appendChild(card);
+
+    // reset empty input
+    name.value = "";
+    calories.value = "";
+
+    // close our form with collapse bootstrap
+
+    /*  const collapseItem = document.getElementById(`collapse-${typeEl}`);
+
+    const bsCollapse = new Bootstrap(collapseItem, { toggle: true });
+
+    bsCollapse; */
+  }
+
+  _filterItem(type, e) {
+    const typeEl = type === "meals" ? "meal" : "workout";
+    const items = document.querySelectorAll(`#${typeEl}-items .card`);
+    let text = e.target.value.trim().toLowerCase();
+    console.log(e.target.value);
+    console.log(items);
+    if (text.innerHTML === "") {
+      items.forEach((element) => element);
+    } else {
+      items.forEach((element) => {
+        const name = element.firstElementChild.firstElementChild.innerText;
+        if (name.toLowerCase().indexOf(text) !== -1) {
+          return element.classList.remove("hidden");
+        } else {
+          return element.classList.add("hidden");
+        }
+      });
+    }
+  }
+
+  _resetDay(e) {
+    e.preventDefault();
+
+    //reset stats
+    this._tracker._meals = [];
+    this._tracker._workouts = [];
+    this._tracker._totalRhytmCalories = 0;
+
+    this._tracker._render();
+
+    //reset progress bar
+    const caloriesProgress = document.getElementById("calorie-progress");
+    caloriesProgress.style.width = `0%`;
+
+    //reset filter
+    document.getElementById("filter-meals").value = "";
+    document.getElementById("filter-workouts").value = "";
+    document.getElementById("meal-items").innerHTML = "";
+    document.getElementById("workout-items").innerHTML = "";
   }
 }
+
+const app = new App();
