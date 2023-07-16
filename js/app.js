@@ -3,29 +3,38 @@
 /* caloriesLimit, caloriesConsumed, caloriesBurned, totalRhytmCalories */
 class CaloriesTracker {
   constructor() {
-    this._caloriesLimit = 1800;
-    this._totalRhytmCalories = 0;
-    this._meals = [];
-    this._workouts = [];
+    this._caloriesLimit = Storage.getCaloriesLimit();
+    this._totalRhytmCalories = Storage.getTotalRhytmCalories();
+    this._meals = Storage.getMeals();
+    this._workouts = Storage.getWorkouts();
     this._displayTotalRhytmCalories();
     this._displayCaloriesLimit();
     this._displayCaloriesBurned();
     this._displayCaloriesConsumed();
     this._displayCaloriesRemaining();
     this._displayCaloriesProgress();
+
+    this.loaderItems();
   }
 
   // public method
   addMeal(meal) {
     this._totalRhytmCalories += meal.calories;
     this._meals.push(meal);
+    this._displayNewMeal(meal);
     this._render();
-    console.log(this._meals);
+
+    Storage.setTotalRhytmCalories(this._totalRhytmCalories);
+    Storage.saveMeal(meal);
   }
   addWorkout(workout) {
     this._totalRhytmCalories -= workout.calories;
     this._workouts.push(workout);
+    this._displayNewWorkout(workout);
     this._render();
+
+    Storage.setTotalRhytmCalories(this._totalRhytmCalories);
+    Storage.saveWorkout(workout);
   }
 
   removeMeal(id) {
@@ -33,12 +42,14 @@ class CaloriesTracker {
 
     if (mealToThrow !== undefined) {
       this._totalRhytmCalories -= mealToThrow.calories;
+      Storage.setTotalRhytmCalories(this._totalRhytmCalories);
     }
 
     const itemId = this._meals.findIndex((element) => element.id === id);
 
     if (itemId !== -1) {
-      this._meals.splice(itemId, 1);
+      Storage.removeMeal(itemId);
+      /*       this._meals.splice(itemId, 1); */
     }
 
     this._render();
@@ -49,12 +60,14 @@ class CaloriesTracker {
 
     if (workoutToThrow !== undefined) {
       this._totalRhytmCalories += workoutToThrow.calories;
+      Storage.setTotalRhytmCalories(this._totalRhytmCalories);
     }
 
     const itemId = this._workouts.findIndex((element) => element.id === id);
 
     if (itemId !== -1) {
-      this._workouts.splice(itemId, 1);
+      Storage.removeWorkout(itemId);
+      /* this._workouts.splice(itemId, 1); */
     }
 
     this._render();
@@ -62,8 +75,14 @@ class CaloriesTracker {
 
   setLimit(caloriesLimit) {
     this._caloriesLimit = caloriesLimit;
+    Storage.setCaloriesLimit(caloriesLimit);
     this._displayCaloriesLimit();
     this._render();
+  }
+
+  loaderItems() {
+    this._meals.forEach((meal) => this._displayNewMeal(meal));
+    this._workouts.forEach((workout) => this._displayNewWorkout(workout));
   }
 
   reset() {
@@ -140,6 +159,58 @@ class CaloriesTracker {
     caloriesProgress.style.width = `${width}%`;
   }
 
+  _displayNewMeal(meal) {
+    const mealItems = document.getElementById("meal-items");
+
+    const card = document.createElement("div");
+
+    card.classList.add("card", "my-2");
+    card.setAttribute("data-id", `${meal.id}`);
+
+    card.innerHTML = `
+    <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                  <h4 class="mx-1">${meal.name}</h4>
+                  <div
+                    class="fs-1 bg-primary text-white text-center rounded-2 px-2 px-sm-5"
+                  >
+                    ${meal.calories}
+                  </div>
+                  <button class="delete btn btn-danger btn-sm mx-2">
+                    <i class="fa-solid fa-xmark"></i>
+                  </button>
+                </div>
+              </div>`;
+
+    mealItems.appendChild(card);
+  }
+
+  _displayNewWorkout(workout) {
+    const workoutItems = document.getElementById("workout-items");
+
+    const card = document.createElement("div");
+
+    card.classList.add("card", "my-2");
+    card.setAttribute("data-id", `${workout.id}`);
+
+    card.innerHTML = `
+    <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                  <h4 class="mx-1">${workout.name}</h4>
+                  <div
+                    class="fs-1 bg-secondary text-white text-center rounded-2 px-2 px-sm-5"
+                  >
+                    ${workout.calories}
+                  </div>
+                  <button class="delete btn btn-danger btn-sm mx-2">
+                    <i class="fa-solid fa-xmark"></i>
+                  </button>
+                </div>
+              </div>`;
+
+    workoutItems.appendChild(card);
+  }
+
   _render() {
     /*  this.__displayCaloriesLimit(); */
     this._displayTotalRhytmCalories();
@@ -167,12 +238,93 @@ class Workout {
     this.calories = calories;
   }
 }
+class Storage {
+  static getCaloriesLimit(defaulltLimit = 2000) {
+    let caloriesLimit;
+    if (localStorage.getItem("caloriesLimit") === null) {
+      caloriesLimit = defaulltLimit;
+    } else {
+      caloriesLimit = +localStorage.getItem("caloriesLimit");
+    }
+    return caloriesLimit;
+  }
 
+  static setCaloriesLimit(caloriesLimit) {
+    localStorage.setItem("caloriesLimit", caloriesLimit);
+  }
+
+  static getTotalRhytmCalories(defaultTotal = 0) {
+    let caloriesTotal;
+    if (localStorage.getItem("totalRhytmCalories") === null) {
+      caloriesTotal = defaultTotal;
+    } else {
+      caloriesTotal = +localStorage.getItem("totalRhytmCalories");
+    }
+    return caloriesTotal;
+  }
+  static setTotalRhytmCalories(caloriesTotal) {
+    localStorage.setItem("totalRhytmCalories", caloriesTotal);
+  }
+
+  static getMeals() {
+    let meals;
+    if (localStorage.getItem("mealItems") === null) {
+      meals = [];
+    } else {
+      meals = JSON.parse(localStorage.getItem("mealItems"));
+    }
+
+    return meals;
+  }
+
+  static saveMeal(meal) {
+    const meals = Storage.getMeals();
+    console.log(meals);
+    meals.push(meal);
+    localStorage.setItem("mealItems", JSON.stringify(meals));
+  }
+
+  static getWorkouts() {
+    let workouts;
+    if (localStorage.getItem("workoutItems") === null) {
+      workouts = [];
+    } else {
+      workouts = JSON.parse(localStorage.getItem("workoutItems"));
+    }
+    return workouts;
+  }
+
+  static saveWorkout(workout) {
+    const workouts = Storage.getWorkouts();
+    workouts.push(workout);
+    localStorage.setItem("workoutItems", JSON.stringify(workouts));
+  }
+
+  static removeMeal(id) {
+    const meals = Storage.getMeals();
+    const idIndex = meals.findIndex((meal) => meal.id === id);
+    meals.splice(idIndex, 1);
+    localStorage.setItem("mealItems", JSON.stringify(meals));
+  }
+
+  static removeWorkout(id) {
+    const workouts = Storage.getWorkouts();
+    const idIndex = workouts.findIndex((workout) => workout.id === id);
+    workouts.splice(idIndex, 1);
+    localStorage.setItem("workoutItems", JSON.stringify(workouts));
+  }
+}
+
+//App UI Class
 class App {
   constructor() {
     this._tracker = new CaloriesTracker();
 
     // add Events Listeners
+    this._loaderEvent();
+  }
+
+  _loaderEvent() {
     document
       .getElementById("meal-form")
       .addEventListener("submit", this._newAddItem.bind(this, "meal"));
@@ -227,38 +379,16 @@ class App {
         ? new Meal(name.value, +calories.value)
         : new Workout(name.value, +calories.value);
 
-    let bgColor = "";
+    /*  let bgColor = ""; */
 
     if (typeEl === "meal") {
+      const meal = item;
       this._tracker.addMeal(item);
-      bgColor = "bg-primary";
     }
     if (typeEl === "workout") {
+      const workout = item;
       this._tracker.addWorkout(item);
-      bgColor = "bg-secondary";
     }
-
-    const card = document.createElement("div");
-
-    card.classList.add("card", "my-2");
-    card.setAttribute("data-id", `${item.id}`);
-
-    card.innerHTML = `
-    <div class="card-body">
-                <div class="d-flex align-items-center justify-content-between">
-                  <h4 class="mx-1">${item.name}</h4>
-                  <div
-                    class="fs-1 ${bgColor} text-white text-center rounded-2 px-2 px-sm-5"
-                  >
-                    ${item.calories}
-                  </div>
-                  <button class="delete btn btn-danger btn-sm mx-2">
-                    <i class="fa-solid fa-xmark"></i>
-                  </button>
-                </div>
-              </div>`;
-
-    newItems.appendChild(card);
 
     // reset empty input
     name.value = "";
@@ -335,6 +465,7 @@ class App {
   _reset(e) {
     e.preventDefault();
 
+    /* localStorage.clear(); */
     // reset stats
     this._tracker.reset();
 
