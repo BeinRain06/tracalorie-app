@@ -14,6 +14,8 @@ class CaloriesTracker {
     this._displayCaloriesRemaining();
     this._displayCaloriesProgress();
 
+    document.getElementById("limit").value = this._caloriesLimit;
+
     this.loaderItems();
   }
 
@@ -48,8 +50,8 @@ class CaloriesTracker {
     const itemId = this._meals.findIndex((element) => element.id === id);
 
     if (itemId !== -1) {
+      this._meals.splice(itemId, 1);
       Storage.removeMeal(itemId);
-      /*       this._meals.splice(itemId, 1); */
     }
 
     this._render();
@@ -57,7 +59,7 @@ class CaloriesTracker {
 
   removeWorkout(id) {
     const workoutToThrow = this._workouts.find((element) => element.id === id);
-
+    console.log(workoutToThrow);
     if (workoutToThrow !== undefined) {
       this._totalRhytmCalories += workoutToThrow.calories;
       Storage.setTotalRhytmCalories(this._totalRhytmCalories);
@@ -66,8 +68,8 @@ class CaloriesTracker {
     const itemId = this._workouts.findIndex((element) => element.id === id);
 
     if (itemId !== -1) {
+      this._workouts.splice(itemId, 1);
       Storage.removeWorkout(itemId);
-      /* this._workouts.splice(itemId, 1); */
     }
 
     this._render();
@@ -75,7 +77,7 @@ class CaloriesTracker {
 
   setLimit(caloriesLimit) {
     this._caloriesLimit = caloriesLimit;
-    Storage.setCaloriesLimit(caloriesLimit);
+    Storage.setCaloriesLimit(this._caloriesLimit);
     this._displayCaloriesLimit();
     this._render();
   }
@@ -86,7 +88,8 @@ class CaloriesTracker {
   }
 
   reset() {
-    //reset stats
+    //reset
+    Storage.clearAll();
     this._meals = [];
     this._workouts = [];
     this._totalRhytmCalories = 0;
@@ -262,6 +265,7 @@ class Storage {
     }
     return caloriesTotal;
   }
+
   static setTotalRhytmCalories(caloriesTotal) {
     localStorage.setItem("totalRhytmCalories", caloriesTotal);
   }
@@ -312,6 +316,12 @@ class Storage {
     const idIndex = workouts.findIndex((workout) => workout.id === id);
     workouts.splice(idIndex, 1);
     localStorage.setItem("workoutItems", JSON.stringify(workouts));
+  }
+
+  static clearAll() {
+    localStorage.removeItem("totalRhytmCalories");
+    localStorage.removeItem("mealItems");
+    localStorage.removeItem("workoutItems");
   }
 }
 
@@ -416,7 +426,7 @@ class App {
 
       console.log(id);
 
-      typeEl = "meal"
+      typeEl === "meal"
         ? this._tracker.removeMeal(id)
         : this._tracker.removeWorkout(id);
 
