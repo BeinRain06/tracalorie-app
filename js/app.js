@@ -215,7 +215,6 @@ class CaloriesTracker {
   }
 
   _render() {
-    /*  this.__displayCaloriesLimit(); */
     this._displayTotalRhytmCalories();
     this._displayCaloriesBurned();
     this._displayCaloriesConsumed();

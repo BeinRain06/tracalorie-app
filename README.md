@@ -10,24 +10,74 @@ Sideland : **## Tracalorie App**
 
 You might be interested on how:
 
-- **canvas** a free to use online graphic design tool to create presentations, logo, posters and more
+- **re-render** the DOM using vanilla javascript
 -
-- or **requestAnimationFrame** , the equivalent of state( in React) to repaint the dom using plain javascript...
+- or **customiwing** kindly in Bootstrap , using the power of bootstrap...
 
 ### Links
 
-- Solution URL: [https://github.com/BeinRain06/breakout-game.git](https://github.com/BeinRain06/breakout-game.git)
+- Solution URL: [https://github.com/BeinRain06/tracalorie-app.git](https://github.com/BeinRain06/tracalorie-app.git)
 - Live Site URL: [https://beinrain06.github.io/breakout-game/](https://beinrain06.github.io/breakout-game/)
 
 ## Description : \* challenge issue
 
-**draw score**
+**style javascript effect progress bar**
 
-> I still now i got trouble to stick the **score drawing** laying at the top right of my canvas shape. Sometimes it appears and others it doesn't. Have not yet figure out why that happens
+> I was confused when made a progress bar in bootstrap will bootstrap class of `progress` or `progress-bar` how to change background color of the **progessBar**.
+
+- I proceed doing
+  ` document.getElementById(`calorie-progress`).style.background= "red"`
+  for example but it didn"t work.
+
+> **a hint**
 >
-> **end game message**
+> i have to use insted `percentage` and style **width** property rather than _backgrounnd_
 >
-> Have not be able to stop the game with a end message, still minding . The goal is to throw an end message on the screen when the ball hit the bottom of the canvas wall, stop the game, and restart it, if the player hit a button `Play Again`,
+> I obtain a result doing like :
+> ` document.getElementById(`calorie-progress`).style.width= `${width}`%`
+
+above the _width_ wrap by the dollar sign represent our calculated **width** that we assign to the style. And too notice the add of `%` after that to pass effectively this value as a `percentage`.
+
+> **Re-render the DOM with vanilla Javascript**
+
+> Well that it is a urge learn and you definitely need to know about that . Well Vanilla looks kind of super fast to achieve static App. Now if you need vanilla to react to change **user** are making to the **dom** you will have to write your javascript in **class** object because only class have this power to re-render after the actual data inside is loaded.
+>
+> But To do so, we have after instanciating our class created somewhere outside the class
+
+- e.g : `caloriesTracker = new CaloriesTracker();`
+
+to lead back to our **class** and called inside **re-render** method thats inside will perform some action **displaying** and this method likely nee to be **private** to the class. See:
+
+        `class CaloriesTracker {
+
+constructor() {
+this.\_caloriesLimit = Storage.getCaloriesLimit();
+this.\_totalRhytmCalories = Storage.getTotalRhytmCalories();
+this.\_meals = Storage.getMeals();
+...
+}
+
+// Public Method
+addMeal(meal) {
+this.\_totalRhytmCalories += meal.calories;
+this.\_meals.push(meal);
+this.\_displayNewMeal(meal);
+**this.\_render()**;
+...
+
+}
+
+// Private Method
+\_render() {
+this.\_displayTotalRhytmCalories();
+this.\_displayCaloriesBurned();
+this.\_displayCaloriesConsumed();
+this.\_displayCaloriesRemaining();
+this.\_displayCaloriesProgress();
+}
+}`
+
+> Doing that we can for our case re-render the **stats** (caloriesConsumed, ...) that deal with the method **addMeal()**
 
 ## Javascript structure:
 
@@ -35,13 +85,14 @@ You might be interested on how:
 
 ## css structure:
 
-> style.css
+> mainly Bootstrap
+> style.css file
 
 **Picture**
 
 ---
 
-![./ Mobile-Breakout-Game.png](./Mobile-Breakout-Game.png)
+![./Desktop-Tracalorie-App.png](./Desktop-Tracalorie-App.png)
 
 ---
 
@@ -56,40 +107,45 @@ i learn basic configuration with `webpack` **frontend environment**. How to use 
 - configure the **scripts** for the **development mode** and the **production mode**
 - set **webpack live development server**
 
-### First time using webpack
+### use power of bootstrap
 
-I also earn about **requestAnimationFrame** . Do you knoow that we can repaint our dom using plain javascript.
-What i means by repaint our DOM is to re-render the content of our dom without using a framework.
+You cannot just googling on bootstrap everitime you want to find information about e.g implementing a new color, a modal. a progress bar, or media queries.
+You can just **downlodad** file such as :
 
-To do that, we use this method **requestAnimationFrame** to tell the document object that be ready i will send you that **functions** that you need to execute before you **repaint** the dom.
+- bootstrap.css & bootstrap.css.map
+- bootstrap-utilities.css & bootstrap-utilities.css.map
+- bootstrap-reboot.css & bootstrap-reboot.css.map
+- bootstrap-grid.css & bootstrap-grid.css.map
 
-- In our case this function is the function we called **update** : `requestAnimationFrame(update)` and we do it recursively to keep track the change of the DOM. It is why this function is called inside the earlier named function `update`.
+> or whatever you just need in your project
+> and Include this/thes file in you `css` style folder . Then will coding , check for the necessary information on these files rather than go once again online
 
 ### Mobile Responsiveness
 
-    - Mobile reponsiveness for mobile max-width: 320px ,max-width: 626px,
+    - Mobile reponsiveness for mobile min-width: 210px
 
 **Picture**
 
 ---
 
-![./Desktop-Breakout-Game.png](./Desktop-Breakout-Game.png)
+![./ Mobile-Tracalorie-App.png](./Mobile-Tracalorie-App.png)
 
 ---
 
 ## Callback History:
 
-- **bounce game** is popular in the tetris game in the growing age of 2D Game . X-axis , Y-axis. It still give a fun to play to it . It's a kind like playing tennis but with a boundary opponent. You Guess! => `canvas wall`. That's right.
+- **lose weight** the real step to lose weight is to burn calories not to drink a wizard liquor like must rely on their thoughts. Actually this app is a best fit to control our rate of calories and added to a section of workout really reshape our body.
+
+> Remember, a body in health a mind in boost.
+> Don't forget to treat yourself for the future nice person you believe.
+>
+> Well isn-t a **callback story** but i tried to make you figure out something nice!
 
 ## Useful Resources :
 
-- wittcode[youtube]: [https://www.youtube.com/watch?v=h3LpsM42s5o](https://www.youtube.com/watch?v=h3LpsM42s5o) : learn about webpack and setting for **react** app instead of using the basic configuration given by the command line `create-react-app`;
+- brad traversy[udemy] : modern javascript course , lead us to this beautifull app
 
 - brad traversy[youtube] : [https://www.youtube.com/watch?v=IZGNcSuwBZs&t=458s](https://www.youtube.com/watch?v=IZGNcSuwBZs&t=458s) : With this article we learn how to configure basically our **front end environment** using **webpack**. A great resource.
-
-- medium.com[lucas Miranda]: [https://medium.com/@pdx.lucasm/canvas-with-react-js-32e133c05258](https://medium.com/@pdx.lucasm/canvas-with-react-js-32e133c05258) : very helpfuk resource to Try Canvas with react.js(also have a related article `Animating a Canvas with React Hooks`)
-
-- pluralsight[Marques Woodson]: [https://www.pluralsight.com/guides/event-listeners-in-react-components](https://www.pluralsight.com/guides/event-listeners-in-react-components) : use **eventListeners** in react. This small article go through the way of using event like `keydown` in react.
 
 ## Acknowledge:
 
@@ -103,9 +159,6 @@ _Our Work always remember this team_
   >
 - `WittCode` with his easy explanation how works webpack with **React**
   >
-- `Marques Woodson` for this such simple and concise article about using **evenlisteners** in React.
-  >
-- `Lucas Miranda` , it was mmersive how to build Cnavas to React. Thank you, you have detailed the process with each step. That make it Great!
 
 ## Author
 

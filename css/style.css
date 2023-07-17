@@ -6,4 +6,8 @@
 
 .hidden {
   display: none;
-}/*# sourceMappingURL=style.css.map */
+}
+
+.color_modif {
+  background-color: #37bd7a;
+}
