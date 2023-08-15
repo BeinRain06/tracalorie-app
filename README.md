@@ -4,7 +4,7 @@ Sideland : **## Tracalorie App**
 
 > ### Overview :
 
-- Take care of your health. Watch over your calories consumed with this app and balance the flow with workouts routine.
+- Take care of your health. Watch out your calories consumed with this app and balance the flow with workouts routine.
 
 ## Interest
 
@@ -17,7 +17,7 @@ You might be interested on how:
 ### Links
 
 - Solution URL: [https://github.com/BeinRain06/tracalorie-app.git](https://github.com/BeinRain06/tracalorie-app.git)
-- Live Site URL: [https://beinrain06.github.io/breakout-game/](https://beinrain06.github.io/breakout-game/)
+- Live Site URL: [https://beinrain06.github.io/tracalorie-app/](https://beinrain06.github.io/tracalorie-app/)
 
 ## Description : \* challenge issue
 
